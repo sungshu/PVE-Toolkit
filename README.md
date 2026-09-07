@@ -2,7 +2,7 @@
 
 **Proxmox VE Infrastructure Toolkit**
 
-把實際部署與維運 Proxmox VE 會反覆使用的工具、硬體監控、Ceph、PBS 與 VMware → PVE 遷移經驗，整理成一套可以直接使用、容易理解、可以長期維護的 Toolkit。
+把實際部署與維運 Proxmox VE 會反覆使用的工具、硬體監控與相關實戰文件，整理成一套可以直接使用、容易理解、可以長期維護的 Toolkit。
 
 ## 🎯 專案定位
 
@@ -10,7 +10,9 @@
 
 它的核心目標是：
 
-> **從 PVE 主機初始化開始，到硬體監控、儲存、Ceph、PBS 與 VMware 遷移，把實際維運會遇到的工作整理成有明確入口與分類的工具箱。**
+> **從 PVE 主機初始化開始，到系統優化與硬體監控，把實際維運會反覆使用的工具整理成有明確入口與分類的工具箱。**
+
+其他 PVE 功能與實戰內容則依用途獨立整理，不塞進主安裝流程。
 
 ### 專案架構
 
@@ -80,7 +82,7 @@ PVE-Toolkit/
 - `src/`：工具與技術文件。
 - `img/`：實機圖片。
 - `src/pve/`：所有 PVE 相關內容。
-- `monitor / ceph / pbs`：PVE 的功能模組。
+- `monitor / ceph / pbs`：依用途分類的 PVE 功能文件。
 - `src/vmware/`：VMware → PVE 遷移來源平台相關內容。
 - 不建立 `src/ceph`、`src/pbs` 等重複頂層目錄。
 - 同一份技術內容只保留一份。
@@ -101,7 +103,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src
 - 建立 Debian 13 Trixie APT 來源
 - 使用 TWDS Debian mirror + Debian Security
 - 使用 PVE `pve-no-subscription`
-- 清除 PVE / Ceph enterprise source 與重複來源
+- 清除 PVE enterprise source 與重複來源
 - 設定 `Asia/Taipei`
 - 設定 Chrony
 - 安裝硬體監控所需工具
@@ -115,25 +117,13 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --upgrade
 ```
 
-### 3. 啟用 Ceph Squid no-subscription repository
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph
-```
-
-### 4. Ceph + 完整升級
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph --upgrade
-```
-
-### 5. 重新套用硬體監控
+### 3. 重新套用硬體監控
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) remod
 ```
 
-### 6. 還原官方 UI
+### 4. 還原官方 UI
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) restore
@@ -161,16 +151,11 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src
 
 - [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
 
-## 💾 Ceph
+## 💾 PVE 實戰文件
 
-目前文件聚焦於實際伺服器儲存與 Dell H755 RAID / Non-RAID 處理：
+PVE 本身已有完整的儲存、Ceph、PBS 等功能；Toolkit 這裡只保留實際部署時累積的實戰文件，不把這些內容塞進一般主機初始化流程。
 
 - [H755 從 RAID 轉 Non-RAID 與 OSD 建置](src/pve/ceph/H755從RAID轉Non-RAID與OSD建置.md)
-
-## 🗄️ PBS
-
-集中整理 PBS 安裝、Datastore、儲存媒體與備份架構規劃：
-
 - [PBS 安裝與儲存規劃](src/pve/pbs/PBS安裝與儲存規劃.md)
 
 ## 🔄 VMware → PVE
