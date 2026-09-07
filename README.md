@@ -38,8 +38,8 @@
 
 | 元件 | 版本 | 用途 |
 |---|---:|---|
-| PVE Toolkit | 2.1.0 | 主入口與整合架構 |
-| `pve_config_notes.sh` | 2.1.0 | PVE 初始化／優化／監控部署 |
+| PVE Toolkit | 2.1.6 | 主入口與整合架構 |
+| `pve_config_notes.sh` | 2.1.6 | PVE 初始化／優化／監控部署 |
 | `disk_monitor.sh` | 1.0.52 | Node Summary 硬體監控 |
 
 目標環境：**Proxmox VE 9.x / Debian 13 Trixie**。
@@ -128,6 +128,20 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) restore
 ```
+
+## 📸 實際安裝畫面
+
+以下為 **PVE Toolkit 2.1.6** 實際在 PVE 9.x 主機執行初始化腳本時的操作畫面，保留完整的階段進度、設定結果與成功／警告／失敗統計，方便快速了解實際執行流程。
+
+![PVE Toolkit 安裝畫面 01](img/pve/09-07%20143743.png)
+
+![PVE Toolkit 安裝畫面 02](img/pve/09-07%20143756.png)
+
+![PVE Toolkit 安裝畫面 03](img/pve/09-07%20143819.png)
+
+![PVE Toolkit 安裝畫面 04](img/pve/09-07%20143826.png)
+
+![PVE Toolkit 安裝畫面 05](img/pve/09-07%20143907.png)
 
 ## 🖥️ 硬體監控
 
