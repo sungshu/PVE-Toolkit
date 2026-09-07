@@ -23,31 +23,20 @@ PVE Toolkit
 ## 倉庫結構
 
 ```text
-PVE-Toolkit/
+src/pve/
 ├── README.md
-├── img/
-│   ├── pve/
-│   │   ├── ceph/
-│   │   ├── pbs/
-│   │   └── monitor/
-│   └── vmware/
-└── src/
-    ├── pve/
-    │   ├── README.md
-    │   ├── pve_config_notes.sh
-    │   ├── 系統初始化與優化.md
-    │   ├── ceph/
-    │   │   └── H755從RAID轉Non-RAID與OSD建置.md
-    │   ├── pbs/
-    │   │   └── PBS安裝與儲存規劃.md
-    │   └── monitor/
-    │       ├── disk_monitor.sh
-    │       └── 硬體監控客製化.md
-    └── vmware/
-        └── VMware遷移至PVE評估.md
+├── pve_config_notes.sh
+├── 系統初始化與優化.md
+├── ceph/
+│   └── H755從RAID轉Non-RAID與OSD建置.md
+├── pbs/
+│   └── PBS安裝與儲存規劃.md
+└── monitor/
+    ├── disk_monitor.sh
+    └── 硬體監控客製化.md
 ```
 
-`src/` 放可執行工具與技術文件；`img/` 只放對應的實機畫面。目錄名稱保持 PVE / VMware 對應，避免同一篇文件散落在不同層級。
+`src/` 放工具與技術文件；`img/` 只放對應的實機畫面。
 
 ## pve_config_notes.sh v2.0.0
 
@@ -66,7 +55,7 @@ v2.0.0 是 PVE Toolkit 的**單一入口**，負責 PVE 系統初始化／優化
 - Datacenter Tag 膠囊樣式與字母排序
 - 自動下載並執行 `monitor/disk_monitor.sh v1.0.52`
 
-### 建議直接執行
+### 直接執行
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh)
@@ -76,19 +65,19 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src
 
 ```bash
 # 完整系統升級
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --upgrade
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --upgrade
 
 # 啟用 Ceph Squid no-subscription
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --ceph
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph
 
-# 同時啟用 Ceph 並完整升級
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --ceph --upgrade
+# Ceph + 完整升級
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph --upgrade
 
 # 重新套用硬體監控 UI
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- remod
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) remod
 
 # 還原官方 UI
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- restore
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) restore
 ```
 
 > `remod` 與 `restore` 會轉呼叫已安裝的 `/root/disk_monitor.sh`，因此第一次使用前需先完成硬體監控安裝。
@@ -107,21 +96,18 @@ INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/s
 
 主要功能：
 
-- CPU 即時頻率、平均／最低／最高頻率與 governor
-- CPU package `PkgWatt`
-- 多 CPU／多插槽溫度分行
-- 網卡溫度整理
-- NVMe SMART、溫度、健康度、通電時數、讀寫 TB
-- SATA / SAS SSD 與 HDD 分類
-- MegaRAID Physical Disk 與一般 `/dev/sdX` 自動分流
+- CPU 頻率、governor、PkgWatt
+- 多 CPU／多插槽與網卡溫度
+- NVMe SMART 與健康資訊
+- SATA / SAS SSD、HDD 分類
+- MegaRAID Physical Disk 自動分流與 RAID Map
 - SMART `OK` / `FAIL` / `UNKNOWN`
-- Node Summary 自適應高度
-- `/run/disk_monitor_runtime/` 背景資料採集
-- `/etc/cron.d/disk_monitor` 每分鐘採集
+- 背景 runtime JSON 採集
+- 每分鐘 cron 採集
 - PVE 官方檔案版本化備份與 restore
 - `install`、`collect`、`restore`、`remod`
 
-### 單獨取得硬體監控
+### 單獨安裝硬體監控
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
@@ -129,34 +115,20 @@ chmod +x /root/disk_monitor.sh
 /root/disk_monitor.sh
 ```
 
-詳細架構、Hook、runtime、備份、還原與實機驗證請參閱：
+完整架構與實機驗證：
 
-**[硬體監控客製化.md](./monitor/硬體監控客製化.md)**
+- [硬體監控客製化](./monitor/硬體監控客製化.md)
 
 ## PVE 文件
 
-### 系統
-
 - [系統初始化與優化](./系統初始化與優化.md)
-
-### 硬體監控
-
-- [PVE Toolkit 腳本與硬體監控說明](./README.md)
 - [硬體監控客製化](./monitor/硬體監控客製化.md)
-
-### Ceph
-
 - [H755 從 RAID 轉 Non-RAID 與 OSD 建置](./ceph/H755從RAID轉Non-RAID與OSD建置.md)
-
-### PBS
-
 - [PBS 安裝與儲存規劃](./pbs/PBS安裝與儲存規劃.md)
 
-## 與其他平台的關係
+## VMware
 
-### VMware
-
-VMware 遷移至 PVE 的評估文件獨立放在 `src/vmware/`，避免把 VMware 特有內容混入 PVE 主機初始化工具。
+VMware 遷移至 PVE 的評估文件獨立放在 `src/vmware/`。
 
 - [VMware 遷移至 PVE 評估](../vmware/VMware遷移至PVE評估.md)
 
@@ -167,4 +139,4 @@ VMware 遷移至 PVE 的評估文件獨立放在 `src/vmware/`，避免把 VMwar
 - `src/pve/pbs/`：PBS 備份與儲存規劃文件。
 - `src/pve/monitor/`：硬體監控程式與完整技術說明。
 - `src/vmware/`：VMware → PVE 遷移評估。
-- `img/`：與上述模組對應的實機截圖，不放文件或腳本。
+- `img/`：與模組對應的實機截圖，不放文件或腳本。
