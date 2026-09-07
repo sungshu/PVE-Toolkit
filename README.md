@@ -163,7 +163,6 @@ chmod +x /root/disk_monitor.sh
 
 ### PVE
 
-- [PVE Toolkit 腳本與硬體監控說明](src/pve/README.md)
 - [PVE 系統初始化與優化](src/pve/系統初始化與優化.md)
 - [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
 
@@ -186,7 +185,6 @@ PVE-Toolkit/
 ├── README.md
 ├── src/
 │   ├── pve/
-│   │   ├── README.md
 │   │   ├── pve_config_notes.sh
 │   │   ├── 系統初始化與優化.md
 │   │   ├── monitor/
