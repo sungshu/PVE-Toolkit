@@ -14,7 +14,7 @@
 ## 目錄結構
 
 ```text
-pve_config_notes/
+PVE-Toolkit/
 ├── img/
 │   ├── pve/
 │   │   ├── ceph/
@@ -30,8 +30,6 @@ pve_config_notes/
     │   └── monitor/
     │       ├── disk_monitor.sh       # 硬體監控核心 v1.0.52
     │       └── 硬體監控客製化.md
-    ├── ceph/
-    ├── pbs/
     └── vmware/
 ```
 
@@ -64,7 +62,7 @@ v2.0.0 將 **PVE 系統初始化／優化與硬體監控安裝整合為單一入
 在 PVE 主機以 `root` 執行：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh)
 ```
 
 預設會執行 PVE 初始化／優化，並自動下載及執行最新的 `disk_monitor.sh v1.0.52`。
@@ -74,7 +72,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/mai
 預設不執行 `apt full-upgrade`。如果希望初始化後一併執行完整系統升級：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- --upgrade
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --upgrade
 ```
 
 ### 啟用 Ceph Squid no-subscription
@@ -82,13 +80,13 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/mai
 需要建立 Ceph Squid no-subscription repository 時：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- --ceph
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --ceph
 ```
 
 也可以同時執行完整升級：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- --ceph --upgrade
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --ceph --upgrade
 ```
 
 ### 重新套用硬體監控 UI
@@ -96,7 +94,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/mai
 如果硬體監控核心已經安裝，需要重新套用 PVE UI Hook：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- remod
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- remod
 ```
 
 ### 還原官方 PVE UI
@@ -104,7 +102,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/mai
 還原 `disk_monitor.sh` 對 PVE UI 的修改：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- restore
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- restore
 ```
 
 ### 本機執行
@@ -124,7 +122,7 @@ chmod +x pve_config_notes.sh
 可透過 `INTERNAL_NTP` 指定內部 NTP Server：
 
 ```bash
-INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh)
+INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh)
 ```
 
 ## disk_monitor.sh v1.0.52
@@ -149,7 +147,7 @@ INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/s
 如果只需要安裝硬體監控，不需要執行 PVE 初始化／APT 設定，可直接下載：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
+curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
 chmod +x /root/disk_monitor.sh
 /root/disk_monitor.sh
 ```
@@ -180,13 +178,13 @@ chmod +x /root/disk_monitor.sh
 - [PVE Toolkit 腳本與硬體監控說明](src/pve/README.md)
 - [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
 
-## Ceph 儲存
+### Ceph 儲存
 
-- [H755 從 RAID 轉 Non-RAID 與 OSD 建置](src/ceph/H755從RAID轉Non-RAID與OSD建置.md)
+- [H755 從 RAID 轉 Non-RAID 與 OSD 建置](src/pve/ceph/H755從RAID轉Non-RAID與OSD建置.md)
 
-## PBS 備份
+### PBS 備份
 
-- [PBS 安裝與儲存規劃](src/pbs/PBS安裝與儲存規劃.md)
+- [PBS 安裝與儲存規劃](src/pve/pbs/PBS安裝與儲存規劃.md)
 
 ## VMware 遷移
 
