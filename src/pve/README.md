@@ -2,182 +2,169 @@
 
 **Proxmox VE Infrastructure Toolkit**：PVE 9（Debian 13 Trixie）台灣環境主機初始化、優化與硬體監控工具。
 
+## 這個專案在做什麼？
+
+PVE Toolkit 把日常 PVE 基礎建置與實機維運工具集中在同一個入口：
+
+```text
+PVE Toolkit
+├── 主機初始化／優化
+│   └── pve_config_notes.sh
+├── 硬體監控
+│   └── monitor/disk_monitor.sh
+├── Ceph
+│   └── ceph/
+└── PBS
+    └── pbs/
+```
+
+主腳本負責 PVE 初始化與優化；硬體監控核心維持獨立，透過主腳本統一安裝與操作。Ceph、PBS 與 VMware 遷移則以獨立實戰文件整理，不把不同用途硬塞進同一支腳本。
+
 ## 倉庫結構
 
 ```text
-src/pve/
-├── pve_config_notes.sh          # PVE 初始化／優化單一入口 v2.0.0
-├── 系統初始化與優化.md
-├── ceph/
-├── pbs/
-└── monitor/
-    ├── disk_monitor.sh          # v1.0.52 PVE 硬體監控核心
-    └── 硬體監控客製化.md
-
-img/pve/
-├── ceph/
-├── pbs/
-└── monitor/                     # PVE 硬體監控實機截圖
+PVE-Toolkit/
+├── README.md
+├── img/
+│   ├── pve/
+│   │   ├── ceph/
+│   │   ├── pbs/
+│   │   └── monitor/
+│   └── vmware/
+└── src/
+    ├── pve/
+    │   ├── README.md
+    │   ├── pve_config_notes.sh
+    │   ├── 系統初始化與優化.md
+    │   ├── ceph/
+    │   │   └── H755從RAID轉Non-RAID與OSD建置.md
+    │   ├── pbs/
+    │   │   └── PBS安裝與儲存規劃.md
+    │   └── monitor/
+    │       ├── disk_monitor.sh
+    │       └── 硬體監控客製化.md
+    └── vmware/
+        └── VMware遷移至PVE評估.md
 ```
+
+`src/` 放可執行工具與技術文件；`img/` 只放對應的實機畫面。目錄名稱保持 PVE / VMware 對應，避免同一篇文件散落在不同層級。
 
 ## pve_config_notes.sh v2.0.0
 
-v2.0.0 將 **PVE 系統初始化／優化與硬體監控安裝整合為單一入口**。
+v2.0.0 是 PVE Toolkit 的**單一入口**，負責 PVE 系統初始化／優化，以及安裝與轉呼叫硬體監控核心。
 
-本腳本負責 PVE 初始化、APT、Chrony、必要監控工具、Datacenter Tag 與 subscription nag Hook，完成後會自動從同一個 GitHub repository 下載並執行：
+本腳本處理：
 
-`monitor/disk_monitor.sh v1.0.52`
+- 備份並重建 Debian APT 來源
+- TWDS Debian mirror、Debian Security
+- PVE no-subscription repository
+- 可選 Ceph Squid no-subscription repository
+- 清除 PVE／Ceph enterprise source 與重複來源
+- `Asia/Taipei` 時區與 Chrony
+- 必要硬體監控工具
+- PVE subscription nag Hook
+- Datacenter Tag 膠囊樣式與字母排序
+- 自動下載並執行 `monitor/disk_monitor.sh v1.0.52`
 
-### 建議：直接從 GitHub 執行
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh)
-```
-
-### 完整系統升級
-
-預設不執行 `apt full-upgrade`。需要完整升級時：
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- --upgrade
-```
-
-### 啟用 Ceph Squid no-subscription
+### 建議直接執行
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- --ceph
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh)
 ```
 
-或同時執行完整升級：
+### 常用參數
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- --ceph --upgrade
+# 完整系統升級
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --upgrade
+
+# 啟用 Ceph Squid no-subscription
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --ceph
+
+# 同時啟用 Ceph 並完整升級
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --ceph --upgrade
+
+# 重新套用硬體監控 UI
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- remod
+
+# 還原官方 UI
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- restore
 ```
 
-### 重新套用硬體監控 UI
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- remod
-```
-
-### 還原官方 UI
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- restore
-```
-
-> `remod` 與 `restore` 是轉呼叫已安裝的 `/root/disk_monitor.sh`，因此必須先完成硬體監控安裝。
-
-### 本機執行
-
-```bash
-chmod +x pve_config_notes.sh
-./pve_config_notes.sh
-./pve_config_notes.sh --upgrade
-./pve_config_notes.sh --ceph
-./pve_config_notes.sh --ceph --upgrade
-./pve_config_notes.sh remod
-./pve_config_notes.sh restore
-```
+> `remod` 與 `restore` 會轉呼叫已安裝的 `/root/disk_monitor.sh`，因此第一次使用前需先完成硬體監控安裝。
 
 ### 內部 NTP
 
 ```bash
-INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh)
+INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh)
 ```
 
 ## disk_monitor.sh v1.0.52
 
 **2026-09-01 正式版，實機測試完成。**
 
-本版本將 CPU、CPU 溫度、網卡溫度、NVMe、SATA/SAS、MegaRAID Physical Disk 等硬體資訊整合到 PVE Node Summary，並使用背景 runtime 採集，避免在 PVE API request 中直接執行完整硬體掃描。
+硬體監控核心將 CPU、CPU 溫度、網卡溫度、NVMe、SATA/SAS、MegaRAID Physical Disk 與 SMART 資訊整合到 PVE Node Summary。
 
-### 主要功能
+主要功能：
 
 - CPU 即時頻率、平均／最低／最高頻率與 governor
 - CPU package `PkgWatt`
-- 多 CPU / 多插槽溫度分行
-- 網卡溫度自動整理
+- 多 CPU／多插槽溫度分行
+- 網卡溫度整理
 - NVMe SMART、溫度、健康度、通電時數、讀寫 TB
 - SATA / SAS SSD 與 HDD 分類
 - MegaRAID Physical Disk 與一般 `/dev/sdX` 自動分流
-- SMART 正常／FAIL／未判定狀態
-- Node Summary `height: "auto"`，支援大量硬碟
+- SMART `OK` / `FAIL` / `UNKNOWN`
+- Node Summary 自適應高度
 - `/run/disk_monitor_runtime/` 背景資料採集
 - `/etc/cron.d/disk_monitor` 每分鐘採集
 - PVE 官方檔案版本化備份與 restore
 - `install`、`collect`、`restore`、`remod`
 
-### 單獨取得硬體監控核心
-
-如果只需要硬體監控，不需要執行 PVE 初始化／APT 設定，可直接下載：
+### 單獨取得硬體監控
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
+curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
 chmod +x /root/disk_monitor.sh
 /root/disk_monitor.sh
 ```
 
-### 背景採集
-
-```bash
-/root/disk_monitor.sh collect
-```
-
-### 重新套用 UI
-
-```bash
-/root/disk_monitor.sh remod
-```
-
-### 還原官方 UI
-
-```bash
-/root/disk_monitor.sh restore
-```
-
-套用完成後，瀏覽器執行 **Ctrl + F5**。
-
-## 實機更新紀錄
-
-本次 v1.0.52 已完成實機驗證，並保留更新前、更新後以及重新部署／驗證的實際畫面。
-
-> 圖片使用 GitHub `raw.githubusercontent.com` 直接引用，避免 README 位於 `src/pve/` 時，相對路徑解析造成破圖。
-
-### 更新前
-
-![Node1 更新前](https://raw.githubusercontent.com/sungshu/pve_config_notes/main/img/pve/monitor/更新前node1_2026-09-01%20163510.png)
-
-![Node5 更新前](https://raw.githubusercontent.com/sungshu/pve_config_notes/main/img/pve/monitor/更新前node5_2026-09-01%20163530.png)
-
-### 更新後
-
-![Node1 更新後](https://raw.githubusercontent.com/sungshu/pve_config_notes/main/img/pve/monitor/更新後node1_2026-09-01%20163103.png)
-
-![Node5 更新後](https://raw.githubusercontent.com/sungshu/pve_config_notes/main/img/pve/monitor/更新後node5-1%202026-09-01%20163110.png)
-
-![Node5 更新後詳細畫面](https://raw.githubusercontent.com/sungshu/pve_config_notes/main/img/pve/monitor/更新後node5-2_2026-09-01%20163123.png)
-
-### 實際重新部署／驗證
-
-以下畫面為正式版完成後，實際重新執行 `disk_monitor.sh` 安裝流程所留下的操作紀錄，不是示意圖。
-
-![Node1 實際部署畫面](https://raw.githubusercontent.com/sungshu/pve_config_notes/main/img/pve/monitor/node1-1_2026-09-02%20085638.png)
-
-![Node1 實際部署畫面 2](https://raw.githubusercontent.com/sungshu/pve_config_notes/main/img/pve/monitor/node1-2_2026-09-02%20085646.png)
-
-![Node5 實際部署畫面](https://raw.githubusercontent.com/sungshu/pve_config_notes/main/img/pve/monitor/node5-1_2026-09-02%20085618.png)
-
-![Node5 實際部署畫面 2](https://raw.githubusercontent.com/sungshu/pve_config_notes/main/img/pve/monitor/node5-2_2026-09-02%20085626.png)
-
-完整的安裝流程、硬體採集架構、PVE API / 前端 Hook、官方檔案備份、PVE 升級後處理與實機驗證說明，請參閱：
+詳細架構、Hook、runtime、備份、還原與實機驗證請參閱：
 
 **[硬體監控客製化.md](./monitor/硬體監控客製化.md)**
 
-## 完成後操作
+## PVE 文件
 
-執行完成後，按 **Ctrl + F5** 重新載入 PVE 節點摘要頁面，確認 CPU、溫度、NVMe、SATA/SAS 與 RAID Physical Disk 資訊。
+### 系統
 
-## 作者
+- [系統初始化與優化](./系統初始化與優化.md)
 
-**sungshu 手札筆記本**
+### 硬體監控
+
+- [PVE Toolkit 腳本與硬體監控說明](./README.md)
+- [硬體監控客製化](./monitor/硬體監控客製化.md)
+
+### Ceph
+
+- [H755 從 RAID 轉 Non-RAID 與 OSD 建置](./ceph/H755從RAID轉Non-RAID與OSD建置.md)
+
+### PBS
+
+- [PBS 安裝與儲存規劃](./pbs/PBS安裝與儲存規劃.md)
+
+## 與其他平台的關係
+
+### VMware
+
+VMware 遷移至 PVE 的評估文件獨立放在 `src/vmware/`，避免把 VMware 特有內容混入 PVE 主機初始化工具。
+
+- [VMware 遷移至 PVE 評估](../vmware/VMware遷移至PVE評估.md)
+
+## 文件維護原則
+
+- `src/pve/`：PVE 工具與所有 PVE 技術文件。
+- `src/pve/ceph/`：Ceph 實作與儲存相關文件。
+- `src/pve/pbs/`：PBS 備份與儲存規劃文件。
+- `src/pve/monitor/`：硬體監控程式與完整技術說明。
+- `src/vmware/`：VMware → PVE 遷移評估。
+- `img/`：與上述模組對應的實機截圖，不放文件或腳本。
