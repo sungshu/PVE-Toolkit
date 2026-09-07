@@ -6,18 +6,84 @@ Proxmox VE 9（Debian 13 Trixie）台灣環境主機優化與硬體監控專案�
 
 ```text
 src/pve/
-├── pve_config_notes.sh          # 系統初始化與優化入口
+├── pve_config_notes.sh          # PVE 初始化／優化單一入口 v2.0.0
 ├── 系統初始化與優化.md
 ├── ceph/
 ├── pbs/
 └── monitor/
-    ├── disk_monitor.sh          # v1.0.52 PVE 硬體監控
+    ├── disk_monitor.sh          # v1.0.52 PVE 硬體監控核心
     └── 硬體監控客製化.md
 
 img/pve/
 ├── ceph/
 ├── pbs/
 └── monitor/                     # PVE 硬體監控實機截圖
+```
+
+## pve_config_notes.sh v2.0.0
+
+v2.0.0 將 **PVE 系統初始化／優化與硬體監控安裝整合為單一入口**。
+
+本腳本負責 PVE 初始化、APT、Chrony、必要監控工具、Datacenter Tag 與 subscription nag Hook，完成後會自動從同一個 GitHub repository 下載並執行：
+
+`monitor/disk_monitor.sh v1.0.52`
+
+### 建議：直接從 GitHub 執行
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh)
+```
+
+### 完整系統升級
+
+預設不執行 `apt full-upgrade`。需要完整升級時：
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- --upgrade
+```
+
+### 啟用 Ceph Squid no-subscription
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- --ceph
+```
+
+或同時執行完整升級：
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- --ceph --upgrade
+```
+
+### 重新套用硬體監控 UI
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- remod
+```
+
+### 還原官方 UI
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh) -- restore
+```
+
+> `remod` 與 `restore` 是轉呼叫已安裝的 `/root/disk_monitor.sh`，因此必須先完成硬體監控安裝。
+
+### 本機執行
+
+```bash
+chmod +x pve_config_notes.sh
+./pve_config_notes.sh
+./pve_config_notes.sh --upgrade
+./pve_config_notes.sh --ceph
+./pve_config_notes.sh --ceph --upgrade
+./pve_config_notes.sh remod
+./pve_config_notes.sh restore
+```
+
+### 內部 NTP
+
+```bash
+INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/pve_config_notes.sh)
 ```
 
 ## disk_monitor.sh v1.0.52
@@ -42,16 +108,13 @@ img/pve/
 - PVE 官方檔案版本化備份與 restore
 - `install`、`collect`、`restore`、`remod`
 
-### 從 GitHub 取得正式版
+### 單獨取得硬體監控核心
+
+如果只需要硬體監控，不需要執行 PVE 初始化／APT 設定，可直接下載：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
 chmod +x /root/disk_monitor.sh
-```
-
-### 安裝
-
-```bash
 /root/disk_monitor.sh
 ```
 
@@ -110,24 +173,6 @@ chmod +x /root/disk_monitor.sh
 完整的安裝流程、硬體採集架構、PVE API / 前端 Hook、官方檔案備份、PVE 升級後處理與實機驗證說明，請參閱：
 
 **[硬體監控客製化.md](./monitor/硬體監控客製化.md)**
-
-## pve_config_notes.sh
-
-### 基本用法
-
-```bash
-./pve_config_notes.sh
-./pve_config_notes.sh restore
-./pve_config_notes.sh remod
-```
-
-### 進階選項
-
-```bash
-./pve_config_notes.sh --upgrade
-./pve_config_notes.sh --ceph
-./pve_config_notes.sh --ceph --upgrade
-```
 
 ## 完成後操作
 
