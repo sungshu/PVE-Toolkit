@@ -113,8 +113,6 @@ INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/s
 /root/disk_monitor.sh
 ```
 
-**svg**
-
 背景資料會使用 runtime JSON 提供 PVE Web UI 使用。
 
 👉 [查看完整的硬體監控安裝流程與實機畫面](src/pve/monitor/硬體監控客製化.md)
