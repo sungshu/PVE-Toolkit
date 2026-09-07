@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
-# pve_config_notes.sh
 # PVE Toolkit - Proxmox VE 9（Debian 13 Trixie）台灣環境主機初始化、優化與硬體監控入口
-# Version: 2.1.1
+# Version: 2.1.2
 # Updated: 2026-09-07
 set -Eeuo pipefail
 
-SCRIPT_VERSION="2.1.1"
+SCRIPT_VERSION="2.1.2"
 readonly DEBIAN_MIRROR="https://mirror.twds.com.tw/debian"
 readonly DEBIAN_SECURITY="https://security.debian.org/debian-security"
 readonly PVE_REPOSITORY="http://download.proxmox.com/debian/pve"
 readonly CEPH_REPOSITORY="http://download.proxmox.com/debian/ceph-squid"
 readonly REPOSITORY_RAW="https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve"
-readonly MONITOR_RAW="${REPOSITORY_RAW}/monitor/disk_monitor.sh"
+readonly MONITOR_RAW="${REPOSITORY_RAW}/monitor/disk_monitor.sh?v=1.0.52"
 readonly SUITE="trixie"
 
 INTERNAL_NTP="${INTERNAL_NTP:-}"
@@ -77,13 +76,7 @@ mkdir -p "$backup_dir"
 echo "APT 設定備份：${backup_dir}"
 
 rm -f /etc/apt/sources.list
-for f in \
-    debian.sources \
-    pve-enterprise.list pve-enterprise.sources \
-    pve-install-repo.list pve-install-repo.sources \
-    pve-no-subscription.list pve-no-subscription.sources \
-    ceph.list ceph.sources ceph-enterprise.list ceph-enterprise.sources \
-    ceph-no-subscription.list ceph-no-subscription.sources; do
+for f in debian.sources pve-enterprise.list pve-enterprise.sources pve-install-repo.list pve-install-repo.sources pve-no-subscription.list pve-no-subscription.sources ceph.list ceph.sources ceph-enterprise.list ceph-enterprise.sources ceph-no-subscription.list ceph-no-subscription.sources; do
     rm -f "/etc/apt/sources.list.d/${f}"
 done
 
@@ -161,8 +154,6 @@ if [[ -f /etc/pve/datacenter.cfg ]]; then
 fi
 
 echo "=== [6/6] 安裝／啟動 PVE 硬體監控 ==="
-# 重要：即使 /root/disk_monitor.sh 已存在，也必須同步 GitHub 最新正式版。
-# 舊版只在檔案不存在時下載，會導致遠端一鍵安裝繼續使用舊版監控程式。
 monitor_tmp="${disk_script}.tmp.$$"
 if ! curl -fsSL "$MONITOR_RAW" -o "$monitor_tmp"; then
     rm -f "$monitor_tmp"
@@ -177,6 +168,9 @@ if ! grep -q '^VERSION="1\.0\.52"' "$monitor_tmp"; then
 fi
 mv -f "$monitor_tmp" "$disk_script"
 chmod 0755 "$disk_script"
+
+# 先顯示實際部署版本，避免舊檔案被誤用而無法察覺。
+grep -m1 '^VERSION=' "$disk_script"
 "$disk_script"
 
 echo
