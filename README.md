@@ -17,7 +17,7 @@
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh)
 ```
 
-初始化包含：
+包含：
 
 - APT Repository 設定與備份
 - Asia/Taipei 時區與 Chrony
@@ -26,46 +26,31 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src
 - Datacenter Tag 樣式
 - 自動部署 `disk_monitor.sh v1.0.52`
 
-完整流程與實際安裝畫面：
-
-👉 [系統初始化與優化](src/pve/系統初始化與優化.md)
+👉 [完整初始化流程與實機安裝畫面](src/pve/系統初始化與優化.md)
 
 ### 常用操作
 
-完整系統升級：
-
 ```bash
+# 完整系統升級
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) --upgrade
-```
 
-啟用 Ceph Squid no-subscription repository：
-
-```bash
+# 啟用 Ceph Squid no-subscription repository
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) --ceph
-```
 
-Ceph + 完整升級：
-
-```bash
+# Ceph + 完整升級
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) --ceph --upgrade
+
+# 重新套用硬體監控 UI
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) remod
+
+# 還原硬體監控 UI
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) restore
 ```
 
-內部 NTP：
+內部 NTP 可透過環境變數指定：
 
 ```bash
 INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh)
-```
-
-重新套用硬體監控 UI：
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) remod
-```
-
-還原硬體監控 UI：
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) restore
 ```
 
 ## 🖥️ 硬體監控
@@ -78,11 +63,9 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src
 /root/disk_monitor.sh
 ```
 
-完整架構、安裝流程與實機畫面：
+👉 [硬體監控客製化與實機畫面](src/pve/monitor/硬體監控客製化.md)
 
-👉 [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
-
-若只需要硬體監控，也可以單獨安裝：
+若只需要硬體監控，可單獨安裝：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
@@ -92,21 +75,10 @@ chmod +x /root/disk_monitor.sh
 
 ## 📚 文件
 
-### PVE
-
 - [系統初始化與優化](src/pve/系統初始化與優化.md)
 - [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
-
-### Ceph
-
 - [H755 從 RAID 轉 Non-RAID 與 OSD 建置](src/pve/ceph/H755從RAID轉Non-RAID與OSD建置.md)
-
-### PBS
-
 - [PBS 安裝與儲存規劃](src/pve/pbs/PBS安裝與儲存規劃.md)
-
-### VMware
-
 - [VMware 遷移至 PVE 評估](src/vmware/VMware遷移至PVE評估.md)
 
 ## 📁 專案結構
@@ -137,15 +109,7 @@ PVE-Toolkit/
 
 ## ⚠️ 執行前請確認
 
-PVE Toolkit 會直接修改 PVE 主機設定，正式環境執行前請確認：
-
-- APT repository 設定
-- PVE Cluster 狀態
-- Storage 與 Network 設定
-- 是否需要執行 `--upgrade`
-- 是否需要啟用 Ceph repository
-
-建議正式執行前先確認現有設定並做好必要備份。
+PVE Toolkit 會直接修改 PVE 主機設定。正式環境執行前，請確認 APT、Cluster、Storage、Network 等現有設定，並做好必要備份。
 
 ## 作者
 
