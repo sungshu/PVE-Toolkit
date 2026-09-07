@@ -12,13 +12,14 @@ PVE Toolkit
 │   └── pve_config_notes.sh
 ├── 硬體監控
 │   └── monitor/disk_monitor.sh
-├── Ceph
-│   └── ceph/
-└── PBS
-    └── pbs/
+├── PVE 實戰文件
+│   ├── ceph/
+│   └── pbs/
+└── VMware → PVE
+    └── ../vmware/
 ```
 
-主腳本負責 PVE 初始化與優化；硬體監控核心維持獨立，透過主腳本統一安裝與操作。Ceph、PBS 與 VMware 遷移則以獨立實戰文件整理，不把不同用途硬塞進同一支腳本。
+主腳本負責 PVE 初始化與優化；硬體監控核心維持獨立，透過主腳本統一安裝與操作。其他 PVE 實戰內容則以獨立文件整理，不把不同用途硬塞進同一支腳本。
 
 ## 倉庫結構
 
@@ -38,17 +39,16 @@ src/pve/
 
 `src/` 放工具與技術文件；`img/` 只放對應的實機畫面。
 
-## pve_config_notes.sh v2.0.0
+## pve_config_notes.sh v2.1.0
 
-v2.0.0 是 PVE Toolkit 的**單一入口**，負責 PVE 系統初始化／優化，以及安裝與轉呼叫硬體監控核心。
+v2.1.0 是 PVE Toolkit 的**單一入口**，負責 PVE 系統初始化／優化，以及安裝與轉呼叫硬體監控核心。
 
 本腳本處理：
 
 - 備份並重建 Debian APT 來源
 - TWDS Debian mirror、Debian Security
 - PVE no-subscription repository
-- 可選 Ceph Squid no-subscription repository
-- 清除 PVE／Ceph enterprise source 與重複來源
+- 清理 enterprise source 與重複來源
 - `Asia/Taipei` 時區與 Chrony
 - 必要硬體監控工具
 - PVE subscription nag Hook
@@ -66,12 +66,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src
 ```bash
 # 完整系統升級
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --upgrade
-
-# 啟用 Ceph Squid no-subscription
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph
-
-# Ceph + 完整升級
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph --upgrade
 
 # 重新套用硬體監控 UI
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) remod
