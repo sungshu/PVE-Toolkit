@@ -1,6 +1,6 @@
-# PVE 系統初始化與硬體監控
+# PVE Toolkit
 
-Proxmox VE 9（Debian 13 Trixie）台灣環境主機優化與硬體監控專案。
+**Proxmox VE Infrastructure Toolkit**：PVE 9（Debian 13 Trixie）台灣環境主機初始化、優化與硬體監控工具。
 
 ## 倉庫結構
 
