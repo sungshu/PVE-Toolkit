@@ -1,150 +1,129 @@
 # PVE Toolkit
 
-**Proxmox VE Infrastructure Toolkit**：PVE 系統初始化、優化、硬體監控與實戰工具。
+**Proxmox VE Infrastructure Toolkit**：把 PVE 主機初始化、硬體監控、Ceph、PBS 與 VMware → PVE 遷移實戰整理在同一個清楚的專案結構中。
 
-## 介紹
+## 這個專案到底要幹嘛？
 
-本專案已從單純的「Config Notes」逐步發展為可直接部署的 PVE Toolkit，持續累積 PVE、Ceph、PBS、VMware 遷移與實戰工具。
+一句話：**把實際部署 PVE 時會反覆使用的腳本、硬體監控與基礎架構實戰文件，整理成可以直接拿來用、也能持續維護的 Toolkit。**
 
-- PVE 版本：9.x（Debian 13 Trixie）
-- 主機初始化／優化入口：`pve_config_notes.sh v2.0.0`
-- 硬體監控正式版：`disk_monitor.sh v1.0.52`
-- 更新日期：2026-09-07
+目前分成兩個層次：
+
+```text
+工具層
+└── src/pve/pve_config_notes.sh
+    └── PVE 初始化／優化單一入口
+        └── 自動安裝 monitor/disk_monitor.sh
+
+技術文件層
+├── src/pve/ceph/      → Ceph / OSD / 儲存
+├── src/pve/pbs/       → PBS / 備份 / 儲存規劃
+├── src/pve/monitor/   → 硬體監控核心與完整技術說明
+└── src/vmware/        → VMware → PVE 遷移評估
+```
+
+`img/` 則只保存對應模組的實機畫面，不混放腳本或文件。
+
+## 目前版本
+
+- **PVE**：9.x（Debian 13 Trixie）
+- **PVE 初始化／優化入口**：`pve_config_notes.sh v2.0.0`
+- **硬體監控核心**：`disk_monitor.sh v1.0.52`
+- **更新日期**：2026-09-07
 
 ## 目錄結構
 
 ```text
 PVE-Toolkit/
+├── README.md
 ├── img/
 │   ├── pve/
 │   │   ├── ceph/
 │   │   ├── pbs/
-│   │   └── monitor/
+│   │   └── monitor/       # 硬體監控實機畫面
 │   └── vmware/
 └── src/
     ├── pve/
-    │   ├── pve_config_notes.sh       # PVE 初始化／優化單一入口 v2.0.0
+    │   ├── README.md
+    │   ├── pve_config_notes.sh
     │   ├── 系統初始化與優化.md
     │   ├── ceph/
+    │   │   └── H755從RAID轉Non-RAID與OSD建置.md
     │   ├── pbs/
+    │   │   └── PBS安裝與儲存規劃.md
     │   └── monitor/
-    │       ├── disk_monitor.sh       # 硬體監控核心 v1.0.52
+    │       ├── disk_monitor.sh
     │       └── 硬體監控客製化.md
     └── vmware/
+        └── VMware遷移至PVE評估.md
 ```
 
-## PVE Toolkit 主入口
+## 🚀 PVE 主機一鍵初始化
 
-### pve_config_notes.sh v2.0.0
+主入口是 `src/pve/pve_config_notes.sh`。
 
-v2.0.0 將 **PVE 系統初始化／優化與硬體監控安裝整合為單一入口**。
-
-`pve_config_notes.sh` 本身負責：
-
-- 備份並重建 Debian APT 來源
-- 使用 TWDS Debian mirror、Debian Security
-- 設定 PVE no-subscription repository
-- 可選擇啟用 Ceph Squid no-subscription repository
-- 移除 PVE／Ceph enterprise source 與重複來源
-- 設定時區 `Asia/Taipei`
-- 設定 Chrony 校時
-- 安裝必要硬體監控工具
-- 設定 PVE subscription nag 修補 Hook
-- 設定 Datacenter Tag 膠囊樣式與字母排序
-- 自動下載並執行 `monitor/disk_monitor.sh v1.0.52`
-
-**注意：v2.0.0 並沒有把兩支 Shell Script 的程式碼硬合併。**
-
-`pve_config_notes.sh` 是 Toolkit 的統一入口；硬體監控核心仍獨立保留在 `monitor/disk_monitor.sh`，避免破壞已完成實機驗證的 v1.0.52。
-
-### 建議安裝方式
-
-在 PVE 主機以 `root` 執行：
+### 預設安裝
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh)
 ```
 
-預設會執行 PVE 初始化／優化，並自動下載及執行最新的 `disk_monitor.sh v1.0.52`。
+預設會：
 
-### 完整系統升級
+- 備份並重建 Debian APT 來源
+- 使用 TWDS Debian mirror 與 Debian Security
+- 設定 PVE no-subscription repository
+- 清除 PVE／Ceph enterprise source 與重複來源
+- 設定 `Asia/Taipei` 與 Chrony
+- 安裝必要硬體監控工具
+- 設定 subscription nag Hook
+- 設定 Datacenter Tag 膠囊樣式與字母排序
+- 自動下載並執行 `monitor/disk_monitor.sh v1.0.52`
 
-預設不執行 `apt full-upgrade`。如果希望初始化後一併執行完整系統升級：
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --upgrade
-```
-
-### 啟用 Ceph Squid no-subscription
-
-需要建立 Ceph Squid no-subscription repository 時：
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --ceph
-```
-
-也可以同時執行完整升級：
+### 常用參數
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- --ceph --upgrade
+# 完整系統升級
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --upgrade
+
+# 啟用 Ceph Squid no-subscription repository
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph
+
+# Ceph + 完整升級
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph --upgrade
+
+# 重新套用硬體監控 UI
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) remod
+
+# 還原官方 UI
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) restore
 ```
 
-### 重新套用硬體監控 UI
-
-如果硬體監控核心已經安裝，需要重新套用 PVE UI Hook：
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- remod
-```
-
-### 還原官方 PVE UI
-
-還原 `disk_monitor.sh` 對 PVE UI 的修改：
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) -- restore
-```
-
-### 本機執行
-
-```bash
-chmod +x pve_config_notes.sh
-./pve_config_notes.sh
-./pve_config_notes.sh --upgrade
-./pve_config_notes.sh --ceph
-./pve_config_notes.sh --ceph --upgrade
-./pve_config_notes.sh remod
-./pve_config_notes.sh restore
-```
+> `--upgrade` 會執行 `apt full-upgrade -y`，正式環境請安排維護時段。
 
 ### 內部 NTP
-
-可透過 `INTERNAL_NTP` 指定內部 NTP Server：
 
 ```bash
 INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh)
 ```
 
-## disk_monitor.sh v1.0.52
+## 🖥️ 硬體監控
 
-正式版包含：
+`disk_monitor.sh v1.0.52` 是目前正式版核心，將 CPU、CPU 溫度、網卡溫度、NVMe、SATA/SAS、MegaRAID Physical Disk 與 SMART 整合到 PVE Node Summary。
 
-- CPU 狀態、頻率、governor、PkgWatt
-- 多 CPU／雙插槽溫度分行
-- 網卡溫度自動編號
-- NVMe SMART、健康度、溫度、通電與讀寫資訊
+主要能力：
+
+- CPU 頻率、governor、PkgWatt
+- 多 CPU／多插槽與網卡溫度
+- NVMe SMART 與健康資訊
 - SATA / SAS SSD、HDD 分類
-- MegaRAID Physical Disk 自動分流
-- SMART 狀態顏色顯示
-- Node Summary Auto-Height
-- 背景硬體資料採集與 `/run/disk_monitor_runtime/`
-- 每分鐘 `/etc/cron.d/disk_monitor`
+- MegaRAID Physical Disk 自動分流與 RAID Map
+- SMART `OK` / `FAIL` / `UNKNOWN`
+- 背景 runtime JSON 採集
+- 每分鐘 cron 採集
 - PVE 官方檔案版本化備份與 restore
 - `install`、`collect`、`restore`、`remod`
 
-### 單獨取得硬體監控核心
-
-如果只需要安裝硬體監控，不需要執行 PVE 初始化／APT 設定，可直接下載：
+### 單獨安裝硬體監控
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
@@ -152,52 +131,46 @@ chmod +x /root/disk_monitor.sh
 /root/disk_monitor.sh
 ```
 
-### 背景採集
+完整架構與實機驗證：
 
-```bash
-/root/disk_monitor.sh collect
-```
+- [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
 
-### 重新套用 UI
+## 📚 技術文件
 
-```bash
-/root/disk_monitor.sh remod
-```
-
-### 還原官方 UI
-
-```bash
-/root/disk_monitor.sh restore
-```
-
-套用完成後，請在 PVE Web UI 執行 **Ctrl + F5**。
-
-## PVE 文件
+### PVE 系統
 
 - [系統初始化與優化](src/pve/系統初始化與優化.md)
 - [PVE Toolkit 腳本與硬體監控說明](src/pve/README.md)
-- [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
 
-### Ceph 儲存
+### Ceph
 
 - [H755 從 RAID 轉 Non-RAID 與 OSD 建置](src/pve/ceph/H755從RAID轉Non-RAID與OSD建置.md)
 
-### PBS 備份
+### PBS
 
 - [PBS 安裝與儲存規劃](src/pve/pbs/PBS安裝與儲存規劃.md)
 
-## VMware 遷移
+### VMware
 
 - [VMware 遷移至 PVE 評估](src/vmware/VMware遷移至PVE評估.md)
 
-## 注意事項
+## 📐 整理原則
 
-- 所有初始化／優化操作請先確認目前 PVE 節點的 APT 與叢集狀態。
-- `--upgrade` 會執行 `apt full-upgrade -y`，正式環境建議於維護時段執行。
-- `--ceph` 僅在需要 Ceph Squid no-subscription repository 時使用。
-- PVE／PBS 版本更新後，部分 UI 插入點與 API 結構可能改變；正式套用前請在測試節點驗證。
+這個 repository 不再採用「想到什麼就丟一個資料夾」的方式：
+
+- **PVE** 是主分類。
+- **monitor / ceph / pbs** 是 PVE 底下的功能模組。
+- **VMware** 保留獨立分類，因為它描述的是遷移來源平台，而不是 PVE 主機本身。
+- **src** 放工具與文件；**img** 放圖片。
+- 同一份內容只保留一份，不建立頂層重複副本。
+- 已實機驗證的核心腳本不因文件整理而重寫功能。
+
+## ⚠️ 使用前注意
+
+- 初始化前請先確認 PVE 節點的 APT、叢集、儲存與網路狀態。
+- 涉及 RAID / Non-RAID、Ceph OSD 或 ZFS 的操作可能清除資料，務必先確認備份。
+- PVE／PBS 升級後，UI Hook 與 API 結構可能改變，正式環境先在測試節點驗證。
 
 ## 作者
 
-**sungshu 手札筆記本**  
-GitHub：sungshu.github.io
+**sungshu 手札筆記本**
