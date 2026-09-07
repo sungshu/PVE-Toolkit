@@ -2,12 +2,18 @@
 # pve_config_notes.sh
 # PVE 9（Debian 13 Trixie）台灣環境主機優化與硬體監控安裝腳本
 #
+# v2.0：統一 PVE 初始化／優化與硬體監控的單一入口。
+# - 系統初始化與優化仍由本腳本處理。
+# - 硬體監控核心維持 monitor/disk_monitor.sh v1.0.52。
+# - 本腳本負責下載、安裝及轉呼叫硬體監控功能。
+# - 不改動 disk_monitor.sh v1.0.52 已驗證的監控核心。
+#
 # 預設行為：
 # - 備份並統一 APT 來源為 TWDS Debian mirror、Debian Security、PVE no-subscription。
 # - 移除 PVE / Ceph enterprise source，避免 401 Unauthorized。
 # - 移除傳統 sources.list 與 debian.sources 重複來源。
 # - 安裝必要監控工具，不執行完整系統升級。
-# - 自動下載並執行同倉庫的 disk_monitor.sh。
+# - 自動下載並執行同倉庫 monitor/disk_monitor.sh。
 #
 # 用法：
 #   ./pve_config_notes.sh
@@ -20,12 +26,13 @@
 # 選用內部 NTP：
 #   INTERNAL_NTP=192.168.0.100 ./pve_config_notes.sh
 set -Eeuo pipefail
-SCRIPT_VERSION="1.0.3"
+SCRIPT_VERSION="2.0.0"
 readonly DEBIAN_MIRROR="https://mirror.twds.com.tw/debian"
 readonly DEBIAN_SECURITY="https://security.debian.org/debian-security"
 readonly PVE_REPOSITORY="http://download.proxmox.com/debian/pve"
 readonly CEPH_REPOSITORY="http://download.proxmox.com/debian/ceph-squid"
 readonly REPOSITORY_RAW="https://raw.githubusercontent.com/sungshu/pve_config_notes/main/src/pve"
+readonly MONITOR_RAW="${REPOSITORY_RAW}/monitor/disk_monitor.sh"
 readonly SUITE="trixie"
 
 INTERNAL_NTP="${INTERNAL_NTP:-}"
@@ -68,7 +75,7 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 if [[ "$script_dir" == /dev/fd* ]]; then
     disk_script="/root/disk_monitor.sh"
 else
-    disk_script="${script_dir}/disk_monitor.sh"
+    disk_script="${script_dir}/monitor/disk_monitor.sh"
 fi
 backup_dir="/root/apt-sources-backup-$(date +%F-%H%M%S)"
 
@@ -188,7 +195,8 @@ if [[ -f /etc/pve/datacenter.cfg ]]; then
 fi
 
 echo "=== [6/6] 下載並套用繁體中文硬體監控介面 ==="
-curl -fsSL "${REPOSITORY_RAW}/disk_monitor.sh" -o "$disk_script"
+mkdir -p "$(dirname "$disk_script")"
+curl -fsSL "$MONITOR_RAW" -o "$disk_script"
 chmod 0755 "$disk_script"
 "$disk_script"
 
