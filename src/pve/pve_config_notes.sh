@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # PVE Toolkit - Proxmox VE 9（Debian 13 Trixie）台灣環境主機初始化、優化與硬體監控入口
-# Version: 2.1.2
+# Version: 2.1.3
 # Updated: 2026-09-07
 set -Eeuo pipefail
 
-SCRIPT_VERSION="2.1.2"
+SCRIPT_VERSION="2.1.3"
 readonly DEBIAN_MIRROR="https://mirror.twds.com.tw/debian"
 readonly DEBIAN_SECURITY="https://security.debian.org/debian-security"
 readonly PVE_REPOSITORY="http://download.proxmox.com/debian/pve"
 readonly CEPH_REPOSITORY="http://download.proxmox.com/debian/ceph-squid"
 readonly REPOSITORY_RAW="https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve"
-readonly MONITOR_RAW="${REPOSITORY_RAW}/monitor/disk_monitor.sh?v=1.0.52"
+readonly MONITOR_RAW="${REPOSITORY_RAW}/monitor/disk_monitor.sh?v=$(date +%s)"
 readonly SUITE="trixie"
 
 INTERNAL_NTP="${INTERNAL_NTP:-}"
@@ -154,22 +154,31 @@ if [[ -f /etc/pve/datacenter.cfg ]]; then
 fi
 
 echo "=== [6/6] 安裝／啟動 PVE 硬體監控 ==="
+
+# 先移除舊版，避免舊檔案在下載失敗或版本驗證失敗時繼續被使用。
+# 新檔案一律先下載到暫存檔，確認版本正確後才正式部署。
+rm -f "$disk_script"
 monitor_tmp="${disk_script}.tmp.$$"
+rm -f "$monitor_tmp"
+
 if ! curl -fsSL "$MONITOR_RAW" -o "$monitor_tmp"; then
     rm -f "$monitor_tmp"
     echo "無法下載最新 disk_monitor.sh：$MONITOR_RAW" >&2
     exit 1
 fi
+
 chmod 0755 "$monitor_tmp"
 if ! grep -q '^VERSION="1\.0\.52"' "$monitor_tmp"; then
-    rm -f "$monitor_tmp"
     echo "下載到的 disk_monitor.sh 版本不符合預期，已停止安裝。" >&2
+    echo "預期版本：1.0.52" >&2
+    grep -m1 '^VERSION=' "$monitor_tmp" >&2 || true
+    rm -f "$monitor_tmp"
     exit 1
 fi
+
 mv -f "$monitor_tmp" "$disk_script"
 chmod 0755 "$disk_script"
 
-# 先顯示實際部署版本，避免舊檔案被誤用而無法察覺。
 grep -m1 '^VERSION=' "$disk_script"
 "$disk_script"
 
