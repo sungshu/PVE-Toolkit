@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # PVE Toolkit - Proxmox VE 9（Debian 13 Trixie）台灣環境主機初始化、優化與硬體監控入口
-# Version: 2.1.6
+# Version: 2.1.7
 # Updated: 2026-09-07
 set -Eeuo pipefail
 
-SCRIPT_VERSION="2.1.6"
+SCRIPT_VERSION="2.1.7"
 readonly DEBIAN_MIRROR="https://mirror.twds.com.tw/debian"
 readonly DEBIAN_SECURITY="https://security.debian.org/debian-security"
 readonly PVE_REPOSITORY="http://download.proxmox.com/debian/pve"
@@ -61,12 +61,8 @@ if [[ ${EUID} -ne 0 ]]; then
     exit 1
 fi
 
-script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-if [[ "$script_dir" == /dev/fd* ]]; then
-    disk_script="/root/disk_monitor.sh"
-else
-    disk_script="${script_dir}/monitor/disk_monitor.sh"
-fi
+# 主入口腳本從 GitHub 下載執行時，正式硬體監控程式固定安裝於 /root。
+disk_script="/root/disk_monitor.sh"
 
 if [[ "$ACTION" != "install" ]]; then
     if [[ ! -x "$disk_script" ]]; then
@@ -299,21 +295,24 @@ echo
 echo "${C_CYAN}${C_BOLD}=========================================================${C_RESET}"
 echo "${C_CYAN}${C_BOLD} 設定結果${C_RESET}"
 echo "${C_CYAN}${C_BOLD}=========================================================${C_RESET}"
-printf '  ${C_GREEN}✓${C_RESET} 成功：%d 項\n' "$OK_COUNT"
-printf '  ${C_RED}✗${C_RESET} 失敗：%d 項\n' "$FAIL_COUNT"
-printf '  ${C_YELLOW}⚠${C_RESET} 警告：%d 項\n' "$WARN_COUNT"
+printf '  %b：%d 項\n' "$OK" "$OK_COUNT"
+printf '  %b：%d 項\n' "$FAIL" "$FAIL_COUNT"
+printf '  %b：%d 項\n' "$WARN" "$WARN_COUNT"
 echo
 if (( FAIL_COUNT > 0 )); then
-    echo "${C_RED}${C_BOLD}結果：失敗${C_RESET}"
+    echo "${C_RED}${C_BOLD}結果：✗ 失敗${C_RESET}"
     echo "${C_RED}請處理上方紅色項目後重新執行。${C_RESET}"
+elif (( WARN_COUNT > 0 )); then
+    echo "${C_YELLOW}${C_BOLD}結果：⚠ 有警告${C_RESET}"
+    echo "${C_YELLOW}目前有警告項目；如需完整執行可重新指定對應選項。${C_RESET}"
 else
-    echo "${C_GREEN}${C_BOLD}結果：成功${C_RESET}"
+    echo "${C_GREEN}${C_BOLD}結果：✓ 成功${C_RESET}"
 fi
 
 echo
-echo "${C_CYAN}=========================================================${C_RESET}"
+echo "${C_CYAN}${C_BOLD}=========================================================${C_RESET}"
 echo "${C_CYAN}${C_BOLD} 硬體監控執行${C_RESET}"
-echo "${C_CYAN}=========================================================${C_RESET}"
+echo "${C_CYAN}${C_BOLD}=========================================================${C_RESET}"
 warn_item "Execute" "尚未執行"
 read -r -p "是否立即執行硬體監控？[Y/n] " RUN_MONITOR
 RUN_MONITOR="${RUN_MONITOR:-Y}"
