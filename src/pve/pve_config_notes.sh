@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # pve_config_notes.sh
 # PVE Toolkit - Proxmox VE 9（Debian 13 Trixie）台灣環境主機初始化、優化與硬體監控入口
-# Version: 2.1.0
+# Version: 2.1.1
 # Updated: 2026-09-07
 set -Eeuo pipefail
 
-SCRIPT_VERSION="2.1.0"
+SCRIPT_VERSION="2.1.1"
 readonly DEBIAN_MIRROR="https://mirror.twds.com.tw/debian"
 readonly DEBIAN_SECURITY="https://security.debian.org/debian-security"
 readonly PVE_REPOSITORY="http://download.proxmox.com/debian/pve"
@@ -70,7 +70,6 @@ fi
 
 backup_dir="/root/apt-sources-backup-$(date +%F-%H%M%S)"
 
-# ---------- APT ----------
 echo "=== [1/6] 備份並重建 APT 來源 ==="
 mkdir -p "$backup_dir"
 [[ -f /etc/apt/sources.list ]] && cp -a /etc/apt/sources.list "$backup_dir/"
@@ -120,7 +119,6 @@ Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
 EOF
 fi
 
-# ---------- TIME ----------
 echo "=== [2/6] 設定 Asia/Taipei 與 Chrony ==="
 timedatectl set-timezone Asia/Taipei
 ntp_lines=$'pool tick.stdtime.gov.tw iburst\npool tock.stdtime.gov.tw iburst\npool tw.pool.ntp.org iburst'
@@ -139,13 +137,11 @@ rtcsync
 makestep 1 3
 EOF
 
-# ---------- UI PATCH ----------
 echo "=== [3/6] 設定 PVE UI subscription nag Hook ==="
 cat > /etc/apt/apt.conf.d/no-nag-script <<'EOF'
 DPkg::Post-Invoke { "dpkg -V proxmox-widget-toolkit | grep -q '/proxmoxlib\\.js$'; if [ $? -eq 1 ]; then { echo 'Patching subscription nag...'; sed -i '/.*data\\.status.*active/{s/!//;s/active/NoMoreNagging/}' /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js; }; fi"; };
 EOF
 
-# ---------- PACKAGES ----------
 echo "=== [4/6] 安裝必要套件 ==="
 apt update
 apt install -y chrony lm-sensors smartmontools linux-cpupower nvme-cli hdparm curl wget util-linux jq
@@ -155,7 +151,6 @@ if [[ "$DO_UPGRADE" -eq 1 ]]; then
 fi
 systemctl enable --now chrony
 
-# ---------- DATACENTER ----------
 echo "=== [5/6] 設定 Datacenter Tag 樣式 ==="
 if [[ -f /etc/pve/datacenter.cfg ]]; then
     if grep -q '^tag-style' /etc/pve/datacenter.cfg; then
@@ -165,11 +160,22 @@ if [[ -f /etc/pve/datacenter.cfg ]]; then
     fi
 fi
 
-# ---------- MONITOR ----------
 echo "=== [6/6] 安裝／啟動 PVE 硬體監控 ==="
-if [[ ! -f "$disk_script" ]]; then
-    curl -fsSL "$MONITOR_RAW" -o "$disk_script"
+# 重要：即使 /root/disk_monitor.sh 已存在，也必須同步 GitHub 最新正式版。
+# 舊版只在檔案不存在時下載，會導致遠端一鍵安裝繼續使用舊版監控程式。
+monitor_tmp="${disk_script}.tmp.$$"
+if ! curl -fsSL "$MONITOR_RAW" -o "$monitor_tmp"; then
+    rm -f "$monitor_tmp"
+    echo "無法下載最新 disk_monitor.sh：$MONITOR_RAW" >&2
+    exit 1
 fi
+chmod 0755 "$monitor_tmp"
+if ! grep -q '^VERSION="1\.0\.52"' "$monitor_tmp"; then
+    rm -f "$monitor_tmp"
+    echo "下載到的 disk_monitor.sh 版本不符合預期，已停止安裝。" >&2
+    exit 1
+fi
+mv -f "$monitor_tmp" "$disk_script"
 chmod 0755 "$disk_script"
 "$disk_script"
 
@@ -181,7 +187,7 @@ echo "PVE APT：pve-no-subscription"
 echo "Debian APT：TWDS + Debian Security"
 echo "時區：Asia/Taipei"
 echo "時間同步：Chrony"
-echo "硬體監控：disk_monitor.sh"
+echo "硬體監控：disk_monitor.sh v1.0.52"
 echo "完整升級：$([[ "$DO_UPGRADE" -eq 1 ]] && echo 已執行 || echo 未執行)"
 echo "Ceph source：$([[ "$ENABLE_CEPH" -eq 1 ]] && echo 已啟用 || echo 未啟用)"
 echo "APT 備份：${backup_dir}"
