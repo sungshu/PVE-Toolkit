@@ -2,7 +2,7 @@
 
 **Proxmox VE Infrastructure Toolkit**
 
-把實際部署與維運 Proxmox VE 時會使用到的初始化工具、硬體監控與實戰文件集中整理，讓 PVE 主機可以快速完成基本環境設定，並提供硬體狀態監控。
+集中整理 Proxmox VE 主機初始化、硬體監控與實戰文件。
 
 > 目前版本：**PVE Toolkit 2.1.7**  
 > 適用環境：**Proxmox VE 9.x / Debian 13 Trixie**
@@ -14,112 +14,75 @@
 在 PVE 主機以 `root` 執行：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh)
 ```
 
-這是 Toolkit 的主要入口。執行後會依序完成：
+初始化包含：
 
-1. **APT 來源設定**
-   - 先備份目前 APT 設定
-   - 建立 Debian 13 Trixie repository
-   - 設定 PVE `pve-no-subscription` repository
-   - 清理舊的 enterprise / 重複來源
-2. **時區與時間同步**
-   - 設定時區為 `Asia/Taipei`
-   - 設定並啟用 Chrony
-3. **PVE Subscription Nag Hook**
-   - 建立自動處理 PVE Subscription Nag 的設定
-4. **必要套件**
-   - 安裝硬體監控與系統管理所需工具
-5. **Datacenter Tag**
-   - 設定 PVE Tag 顯示為完整膠囊樣式並依字母排序
-6. **硬體監控**
-   - 自動下載並部署 `disk_monitor.sh v1.0.52`
+- APT Repository 設定與備份
+- Asia/Taipei 時區與 Chrony
+- PVE Subscription Nag Hook
+- 必要系統與硬體監控套件
+- Datacenter Tag 樣式
+- 自動部署 `disk_monitor.sh v1.0.52`
 
-執行完成後，畫面會顯示成功、失敗與警告項目。
+完整流程與實際安裝畫面：
 
-## 🔧 常用操作
+👉 [系統初始化與優化](src/pve/系統初始化與優化.md)
 
-### 初始化 + 完整系統升級
+### 常用操作
 
-預設初始化**不會執行** `apt full-upgrade`。
-
-如果希望同時進行完整系統升級：
+完整系統升級：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --upgrade
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) --upgrade
 ```
 
-### 重新套用硬體監控 UI
-
-已經安裝硬體監控，但需要重新套用 UI 修改時：
+啟用 Ceph Squid no-subscription repository：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) remod
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) --ceph
 ```
 
-### 還原硬體監控 UI 修改
-
-如果需要移除硬體監控對 PVE 官方 UI 檔案的修改：
+Ceph + 完整升級：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) restore
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) --ceph --upgrade
 ```
 
-> `restore` 是還原 **硬體監控 UI 修改**，不是將整台 PVE 主機完整還原到執行 Toolkit 之前的狀態。
-
-### 啟用 Ceph repository
-
-只有在需要 Ceph Squid no-subscription repository 時使用：
+內部 NTP：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph
+INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh)
 ```
 
-也可以搭配完整升級：
+重新套用硬體監控 UI：
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh) --ceph --upgrade
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) remod
 ```
 
-### 內部 NTP Server
-
-如果環境有內部 NTP Server，可以透過 `INTERNAL_NTP` 指定：
+還原硬體監控 UI：
 
 ```bash
-INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_config_notes.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/pve_init.sh) restore
 ```
 
 ## 🖥️ 硬體監控
 
-`disk_monitor.sh v1.0.52` 是 Toolkit 的硬體監控核心，會將硬體資訊整合到 PVE Node Summary。
+`disk_monitor.sh v1.0.52` 將 CPU、溫度、NVMe、SATA/SAS、MegaRAID、SMART 等硬體資訊整合至 PVE Node Summary。
 
-目前支援：
-
-- CPU 頻率、governor、PkgWatt
-- CPU 與多 CPU 插槽溫度
-- 網卡溫度
-- NVMe SMART 與健康資訊
-- SATA / SAS SSD / HDD
-- MegaRAID Physical Disk
-- RAID Map
-- SMART `OK / FAIL / UNKNOWN`
-- 背景硬體資料採集
-- PVE 官方檔案版本化備份與還原
-
-硬體監控程式正式安裝位置：
+正式安裝位置：
 
 ```text
 /root/disk_monitor.sh
 ```
 
-背景資料會使用 runtime JSON 提供 PVE Web UI 使用。
+完整架構、安裝流程與實機畫面：
 
-👉 [查看完整的硬體監控安裝流程與實機畫面](src/pve/monitor/硬體監控客製化.md)
+👉 [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
 
-### 單獨安裝硬體監控
-
-如果只需要硬體監控，不需要執行 PVE 初始化：
+若只需要硬體監控，也可以單獨安裝：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
@@ -127,43 +90,11 @@ chmod +x /root/disk_monitor.sh
 /root/disk_monitor.sh
 ```
 
-背景採集：
-
-```bash
-/root/disk_monitor.sh collect
-```
-
-重新套用 UI：
-
-```bash
-/root/disk_monitor.sh remod
-```
-
-還原 UI 修改：
-
-```bash
-/root/disk_monitor.sh restore
-```
-
-套用 UI 修改後，請在 PVE Web UI 執行 **Ctrl + F5**。
-
-## 📸 實際安裝畫面
-
-以下為 **PVE Toolkit 2.1.7** 實際在 PVE 9.x 主機執行初始化腳本時的操作畫面。
-
-![PVE Toolkit 安裝畫面 01](img/pve/2026-09-07%20144912.png)
-
-![PVE Toolkit 安裝畫面 02](img/pve/2026-09-07%20145031.png)
-
-![PVE Toolkit 安裝畫面 03](img/pve/2026-09-07%20145048.png)
-
-![PVE Toolkit 安裝畫面 04](img/pve/2026-09-07%20145110.png)
-
 ## 📚 文件
 
 ### PVE
 
-- [PVE 系統初始化與優化](src/pve/系統初始化與優化.md)
+- [系統初始化與優化](src/pve/系統初始化與優化.md)
 - [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
 
 ### Ceph
@@ -185,7 +116,7 @@ PVE-Toolkit/
 ├── README.md
 ├── src/
 │   ├── pve/
-│   │   ├── pve_config_notes.sh
+│   │   ├── pve_init.sh
 │   │   ├── 系統初始化與優化.md
 │   │   ├── monitor/
 │   │   │   ├── disk_monitor.sh
@@ -206,9 +137,7 @@ PVE-Toolkit/
 
 ## ⚠️ 執行前請確認
 
-PVE Toolkit 的初始化腳本會直接修改 PVE 主機設定，執行前請確認目前節點的環境與維運需求。
-
-尤其是：
+PVE Toolkit 會直接修改 PVE 主機設定，正式環境執行前請確認：
 
 - APT repository 設定
 - PVE Cluster 狀態
@@ -216,15 +145,7 @@ PVE Toolkit 的初始化腳本會直接修改 PVE 主機設定，執行前請確
 - 是否需要執行 `--upgrade`
 - 是否需要啟用 Ceph repository
 
-> ⚠️ **使用提醒**
->
-> 本專案已盡最大努力進行實機測試與驗證，並持續修正不同 PVE 環境下可能遇到的問題。
->
-> 但由於 Proxmox VE 主機的硬體、RAID 控制器、NVMe / SATA / SAS 磁碟、網卡、CPU 與既有系統設定可能各不相同，**無法保證本工具能在所有機器與所有環境下正常運作**。
->
-> 建議在正式環境執行前，先確認目前主機設定並做好必要備份。使用本工具前，請自行評估是否適合目前環境。
-
-另外，Ceph OSD、RAID → Non-RAID 等儲存操作屬於獨立的實戰文件，執行前務必確認資料與備份狀態。
+建議正式執行前先確認現有設定並做好必要備份。
 
 ## 作者
 
