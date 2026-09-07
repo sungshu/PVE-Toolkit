@@ -1,10 +1,10 @@
-# PVE 台灣化設定手記
+# PVE Toolkit
 
-Proxmox VE / PBS 虛擬化實戰筆記本：記錄 PVE 系統摸索、優化、儲存架構、備份與 VMware 遷移評估等各項主題。
+**Proxmox VE Infrastructure Toolkit**：PVE 系統初始化、優化、硬體監控與實戰工具。
 
 ## 介紹
 
-本專案採用主題式分類，持續累積 PVE、Ceph、PBS、VMware 遷移與實戰工具。
+本專案已從單純的「Config Notes」逐步發展為可直接部署的 PVE Toolkit，持續累積 PVE、Ceph、PBS、VMware 遷移與實戰工具。
 
 - PVE 版本：9.x（Debian 13 Trixie）
 - 主機初始化／優化入口：`pve_config_notes.sh v2.0.0`
@@ -35,7 +35,7 @@ pve_config_notes/
     └── vmware/
 ```
 
-## PVE 主機初始化與硬體監控
+## PVE Toolkit 主入口
 
 ### pve_config_notes.sh v2.0.0
 
@@ -57,7 +57,7 @@ v2.0.0 將 **PVE 系統初始化／優化與硬體監控安裝整合為單一入
 
 **注意：v2.0.0 並沒有把兩支 Shell Script 的程式碼硬合併。**
 
-`pve_config_notes.sh` 是統一入口；硬體監控核心仍獨立保留在 `monitor/disk_monitor.sh`，避免破壞已完成實機驗證的 v1.0.52。
+`pve_config_notes.sh` 是 Toolkit 的統一入口；硬體監控核心仍獨立保留在 `monitor/disk_monitor.sh`，避免破壞已完成實機驗證的 v1.0.52。
 
 ### 建議安裝方式
 
@@ -108,8 +108,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/pve_config_notes/mai
 ```
 
 ### 本機執行
-
-如果已下載 `pve_config_notes.sh`：
 
 ```bash
 chmod +x pve_config_notes.sh
@@ -179,7 +177,7 @@ chmod +x /root/disk_monitor.sh
 ## PVE 文件
 
 - [系統初始化與優化](src/pve/系統初始化與優化.md)
-- [PVE 腳本與硬體監控說明](src/pve/README.md)
+- [PVE Toolkit 腳本與硬體監控說明](src/pve/README.md)
 - [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
 
 ## Ceph 儲存
