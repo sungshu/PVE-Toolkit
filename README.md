@@ -7,6 +7,10 @@
 > 目前版本：**PVE Toolkit 2.1.7**  
 > 適用環境：**Proxmox VE 9.x / Debian 13 Trixie**
 
+## 🔄 專案流程
+
+![PVE Toolkit 自動化管理流程](img/pve/PVE-Toolkit_自動化管理流程.png)
+
 ## 🚀 快速開始
 
 ### PVE 主機初始化
