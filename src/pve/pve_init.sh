@@ -10,7 +10,7 @@ readonly DEBIAN_SECURITY="https://security.debian.org/debian-security"
 readonly PVE_REPOSITORY="http://download.proxmox.com/debian/pve"
 readonly CEPH_REPOSITORY="http://download.proxmox.com/debian/ceph-squid"
 readonly REPOSITORY_RAW="https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve"
-readonly MONITOR_RAW="${REPOSITORY_RAW}/monitor/disk_monitor.sh"
+readonly MONITOR_RAW="${REPOSITORY_RAW}/disk_monitor.sh"
 readonly SUITE="trixie"
 INTERNAL_NTP="${INTERNAL_NTP:-}"
 DO_UPGRADE=0
@@ -306,30 +306,5 @@ elif (( WARN_COUNT > 0 )); then
     echo "${C_YELLOW}${C_BOLD}結果：⚠ 有警告${C_RESET}"
     echo "${C_YELLOW}目前有警告項目；如需完整執行可重新指定對應選項。${C_RESET}"
 else
-    echo "${C_GREEN}${C_BOLD}結果：✓ 成功${C_RESET}"
+    echo "${C_GREEN}${C_BOLD}結果：✓ 完成${C_RESET}"
 fi
-
-echo
-echo "${C_CYAN}${C_BOLD}=========================================================${C_RESET}"
-echo "${C_CYAN}${C_BOLD} 硬體監控執行${C_RESET}"
-echo "${C_CYAN}${C_BOLD}=========================================================${C_RESET}"
-warn_item "Execute" "尚未執行"
-read -r -p "是否立即執行硬體監控？[Y/n] " RUN_MONITOR
-RUN_MONITOR="${RUN_MONITOR:-Y}"
-
-if [[ "$RUN_MONITOR" =~ ^[Yy]$ ]]; then
-    echo
-    info_item "disk_monitor.sh" "啟動中..."
-    if "$disk_script"; then
-        ok_item "Hardware Monitor" "執行完成"
-    else
-        fail_item "Hardware Monitor" "執行失敗"
-    fi
-else
-    warn_item "Hardware Monitor" "已安裝但未執行"
-fi
-
-echo
-echo "${C_CYAN}${C_BOLD}=========================================================${C_RESET}"
-echo "${C_CYAN}${C_BOLD} PVE Toolkit v${SCRIPT_VERSION} 初始化完成${C_RESET}"
-echo "${C_CYAN}${C_BOLD}=========================================================${C_RESET}"
