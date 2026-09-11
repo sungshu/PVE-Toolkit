@@ -35,6 +35,8 @@ PVE Toolkit 目前主要包含兩個部分：
 >
 > 執行前請確認目標主機環境、目前設定與備份狀態。尤其 `pve_init.sh`、`--upgrade`、`remod` 與 `restore` 等操作可能會修改系統或 PVE Web UI 相關檔案。
 >
+> **如果您仍然心存疑慮，請不要使用本軟體。**
+>
 > ### 🇹🇼 更新來源提醒
 >
 > `pve_init.sh` 會修改 PVE 的 APT Repository 設定，其中 Debian 套件來源預設使用**台灣來源伺服器**：
