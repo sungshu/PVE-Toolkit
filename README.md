@@ -4,10 +4,13 @@
 
 ![PVE Toolkit 自動化管理流程](img/p00/PVE-Toolkit_自動化管理流程.jpg)
 
+> **🇹🇼 TW 繁體中文版**  
 > **目前版本：PVE Toolkit 2.1.7**  
 > **適用環境：Proxmox VE 9.x / Debian 13 Trixie**
 
 PVE Toolkit 是針對 Proxmox VE 主機日常建置與維護所整理的 Shell 工具與實戰文件。
+
+本專案提供 **TW 繁體中文版**，並在系統初始化時使用**台灣來源伺服器**作為 Debian 套件更新來源；PVE Repository 仍使用 Proxmox 官方來源。
 
 它不取代 PVE 原生命令，而是把主機初始化、系統優化、硬體監控與 PVE Web UI 客製化等常用工作集中整理，讓需要重複執行或容易遺漏的步驟，可以透過固定流程快速完成。
 
@@ -30,7 +33,23 @@ PVE Toolkit 目前主要包含兩個部分：
 >
 > PVE Toolkit 是依照實際環境整理的實戰工具，**不保證適用於每一台 Proxmox VE 主機，也不保證在不同硬體、PVE 版本、套件版本或系統環境下都能正常執行。**
 >
-> 執行前請確認目標主機環境、目前設定與備份狀態。尤其 `--upgrade`、`remod` 與 `restore` 等操作可能會修改系統或 PVE Web UI 相關檔案。
+> 執行前請確認目標主機環境、目前設定與備份狀態。尤其 `pve_init.sh`、`--upgrade`、`remod` 與 `restore` 等操作可能會修改系統或 PVE Web UI 相關檔案。
+>
+> ### 🇹🇼 更新來源提醒
+>
+> `pve_init.sh` 會修改 PVE 的 APT Repository 設定，其中 Debian 套件來源預設使用**台灣來源伺服器**：
+>
+> ```text
+> https://mirror.twds.com.tw/debian
+> ```
+>
+> PVE Repository 仍使用 Proxmox 官方來源：
+>
+> ```text
+> http://download.proxmox.com/debian/pve
+> ```
+>
+> **如果你不希望變更目前 PVE 的更新來源，請不要執行 `pve_init.sh`。**
 >
 > 如果你的環境與本文測試環境不同，請先確認腳本內容與實際影響，再決定是否執行。
 
@@ -121,6 +140,7 @@ INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/s
 
 - APT Repository 設定與原始設定備份
 - Debian 13 Trixie / PVE no-subscription Repository
+- 台灣 Debian 套件來源伺服器
 - `Asia/Taipei` 時區設定
 - Chrony 時間同步與內部 NTP 指定
 - PVE Subscription Nag Hook
