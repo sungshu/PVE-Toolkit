@@ -30,7 +30,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src
 - Datacenter Tag 樣式
 - 自動部署 `disk_monitor.sh v1.0.52`
 
-👉 [完整初始化流程與實機安裝畫面](src/pve/系統初始化與優化.md)
+👉 [完整初始化流程與實機安裝畫面](00.PVE系統初始化與優化.md)
 
 ### 常用操作
 
@@ -67,42 +67,41 @@ INTERNAL_NTP=192.168.0.100 bash <(curl -fsSL https://raw.githubusercontent.com/s
 /root/disk_monitor.sh
 ```
 
-👉 [硬體監控客製化與實機畫面](src/pve/monitor/硬體監控客製化.md)
+👉 [硬體監控客製化與實機畫面](01.PVE硬體監控客製化.md)
 
 若只需要硬體監控，可單獨安裝：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/monitor/disk_monitor.sh -o /root/disk_monitor.sh
+curl -fsSL https://raw.githubusercontent.com/sungshu/PVE-Toolkit/main/src/pve/disk_monitor.sh -o /root/disk_monitor.sh
 chmod +x /root/disk_monitor.sh
 /root/disk_monitor.sh
 ```
 
 ## 📚 文件
 
-- [系統初始化與優化](src/pve/系統初始化與優化.md)
-- [硬體監控客製化](src/pve/monitor/硬體監控客製化.md)
-- [H755 從 RAID 轉 Non-RAID 與 OSD 建置](src/pve/ceph/H755從RAID轉Non-RAID與OSD建置.md)
-- [PBS 安裝與儲存規劃](src/pve/pbs/PBS安裝與儲存規劃.md)
-- [VMware 遷移至 PVE 評估](src/vmware/VMware遷移至PVE評估.md)
+- [00. PVE 系統初始化與優化](00.PVE系統初始化與優化.md)
+- [01. PVE 硬體監控客製化](01.PVE硬體監控客製化.md)
+- [02. PVE-Ceph-H755 從 RAID 轉 Non-RAID 與 OSD 建置](02.PVE-Ceph-H755從RAID轉Non-RAID與OSD建置.md)
+- [03. PBS 安裝與儲存規劃](03.PBS安裝與儲存規劃.md)
+- [04. VMware 遷移至 PVE 評估](04.VMware遷移至PVE評估.md)
 
 ## 📁 專案結構
 
 ```text
 PVE-Toolkit/
 ├── README.md
+│
+├── 00.PVE系統初始化與優化.md
+├── 01.PVE硬體監控客製化.md
+├── 02.PVE-Ceph-H755從RAID轉Non-RAID與OSD建置.md
+├── 03.PBS安裝與儲存規劃.md
+├── 04.VMware遷移至PVE評估.md
+│
 ├── src/
-│   ├── pve/
-│   │   ├── pve_init.sh
-│   │   ├── 系統初始化與優化.md
-│   │   ├── monitor/
-│   │   │   ├── disk_monitor.sh
-│   │   │   └── 硬體監控客製化.md
-│   │   ├── ceph/
-│   │   │   └── H755從RAID轉Non-RAID與OSD建置.md
-│   │   └── pbs/
-│   │       └── PBS安裝與儲存規劃.md
-│   └── vmware/
-│       └── VMware遷移至PVE評估.md
+│   └── pve/
+│       ├── pve_init.sh
+│       └── disk_monitor.sh
+│
 └── img/
     ├── pve/
     │   ├── ceph/
