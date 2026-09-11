@@ -2,14 +2,14 @@
 
 **Proxmox VE Infrastructure Toolkit**
 
-集中整理 Proxmox VE 主機初始化、硬體監控與實戰文件。
+集中整理 Proxmox VE 主機初始化與硬體監控相關工具與實戰文件。
 
 > 目前版本：**PVE Toolkit 2.1.7**  
 > 適用環境：**Proxmox VE 9.x / Debian 13 Trixie**
 
 ## 🔄 專案流程
 
-![PVE Toolkit 自動化管理流程](img/pve/PVE-Toolkit_自動化管理流程.png)
+![PVE Toolkit 自動化管理流程](img/p00/PVE-Toolkit_自動化管理流程.png)
 
 ## 🚀 快速開始
 
@@ -81,9 +81,6 @@ chmod +x /root/disk_monitor.sh
 
 - [00. PVE 系統初始化與優化](00.PVE系統初始化與優化.md)
 - [01. PVE 硬體監控客製化](01.PVE硬體監控客製化.md)
-- [02. PVE-Ceph-H755 從 RAID 轉 Non-RAID 與 OSD 建置](02.PVE-Ceph-H755從RAID轉Non-RAID與OSD建置.md)
-- [03. PBS 安裝與儲存規劃](03.PBS安裝與儲存規劃.md)
-- [04. VMware 遷移至 PVE 評估](04.VMware遷移至PVE評估.md)
 
 ## 📁 專案結構
 
@@ -93,9 +90,6 @@ PVE-Toolkit/
 │
 ├── 00.PVE系統初始化與優化.md
 ├── 01.PVE硬體監控客製化.md
-├── 02.PVE-Ceph-H755從RAID轉Non-RAID與OSD建置.md
-├── 03.PBS安裝與儲存規劃.md
-├── 04.VMware遷移至PVE評估.md
 │
 ├── src/
 │   └── pve/
@@ -103,11 +97,8 @@ PVE-Toolkit/
 │       └── disk_monitor.sh
 │
 └── img/
-    ├── pve/
-    │   ├── ceph/
-    │   ├── pbs/
-    │   └── monitor/
-    └── vmware/
+    ├── p00/
+    └── p01/
 ```
 
 ## ⚠️ 執行前請確認
